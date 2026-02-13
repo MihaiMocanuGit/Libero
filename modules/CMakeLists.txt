@@ -1,5 +1,5 @@
 set(library_name "modules")
-set(module_names "Common")
+set(module_names "Common;SmartResource")
 
 foreach(module ${module_names})
     add_subdirectory(${module})
