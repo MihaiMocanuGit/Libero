@@ -1,0 +1,9 @@
+# IDE specific
+.vscode
+.idea
+cmake-build-*
+.cache
+compile_commands.json
+
+# Program specific
+build_*

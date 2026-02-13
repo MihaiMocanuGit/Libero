@@ -1,0 +1,11 @@
+---
+BasedOnStyle: LLVM
+BreakBeforeBraces: Allman
+BreakTemplateDeclarations: Yes
+ColumnLimit: 100
+IncludeBlocks: Regroup
+IndentCaseLabels: true
+IndentWidth: 4
+IndentWrappedFunctionNames: true
+InsertNewlineAtEOF: true
+SpaceBeforeCpp11BracedList: true
