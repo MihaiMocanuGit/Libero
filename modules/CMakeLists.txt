@@ -1,5 +1,5 @@
 set(library_name "modules")
-set(module_names "Utilities;SmartResource")
+set(module_names "Utilities;SmartResource;ECS")
 
 foreach(module ${module_names})
     add_subdirectory(${module})
