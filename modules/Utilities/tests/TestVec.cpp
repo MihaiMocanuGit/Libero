@@ -1,4 +1,4 @@
-#include "Common/Vec.hpp"
+#include "Utilities/Vec.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 

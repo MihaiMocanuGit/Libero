@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-namespace lbr::common
+namespace lbr::utl
 {
 
 template <typename T, size_t N>
@@ -88,4 +88,4 @@ inline Vec<T, N> Rect<T, N>::center() const noexcept
     return mid;
 }
 
-} // namespace lbr::common
+} // namespace lbr::utl

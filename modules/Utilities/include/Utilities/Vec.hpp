@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdlib>
 
-namespace lbr::common
+namespace lbr::utl
 {
 
 template <typename T, size_t N>
@@ -56,6 +56,6 @@ template <typename T>
 using Rect3 = Rect<float, 3>;
 using Rect3f = Rect<float, 3>;
 
-} // namespace lbr::common
+} // namespace lbr::utl
 
 #include "detail/Vec.hxx"

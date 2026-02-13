@@ -1,4 +1,4 @@
-set(module_name Common)
+set(module_name Utilities)
 
 set(public_headers "Vec.hpp")
 set(private_headers "")
