@@ -1,6 +1,6 @@
 set(module_name ECS)
 
-set(public_headers "Components.hpp")
+set(public_headers "Components.hpp;Entity.hpp")
 set(private_headers "")
 set(detail_headers "")
 set(sources "")

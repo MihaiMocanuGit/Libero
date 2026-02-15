@@ -3,8 +3,9 @@
 ###################################################################################################
 set(Boost_version "1.88.0")
 set(Boost_components container)
+set(Boost_header_only_components)
 set(BOOST_ENABLE_CMAKE ON)
-find_package(Boost ${Boost_version} QUIET CONFIG COMPONENTS ${Boost_components})
+find_package(Boost ${Boost_version} QUIET CONFIG COMPONENTS ${Boost_components} ${Boost_header_only_components})
 if(Boost_FOUND)
     message(STATUS "Boost was found.")
 else()
