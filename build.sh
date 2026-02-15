@@ -6,7 +6,7 @@ IFS=$'\n\t'
 project="Libero"
 
 build_type="release"
-job_count="12"
+job_count=$(nproc)
 
 Help()
 {
@@ -16,9 +16,9 @@ Help()
    echo "Options:"
    echo "    -h     Prints this help page."
    echo "    -b     Sets the build type (debug/release/relwithdebinfo/minsizerel)."
-   echo "           DEFAULT: release"
+   echo "           DEFAULT: ${build_type}"
    echo "    -j     Sets the thread job count."
-   echo "           DEFAULT: 12"
+   echo "           DEFAULT: ${job_count}"
    echo "ARGS: run program with given arguments"
 }
 
