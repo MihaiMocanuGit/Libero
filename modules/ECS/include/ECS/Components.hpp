@@ -3,7 +3,6 @@
 #include "Utilities/Vec.hpp"
 
 #include <concepts>
-#include <cstdint>
 namespace lbr::ecs::components
 {
 enum class EnumTypes
@@ -11,10 +10,10 @@ enum class EnumTypes
     Transform = 0,
     Boundary,
     Controlable,
-#ifdef ECS_COMPONENTS_CUSTOM_ENUM_TYPES
-    ECS_COMPONENTS_CUSTOM_ENUM_TYPES
+#ifdef ECS_COMPONENTS_CUSTOM              // it should be a build system define
+#include ECS_COMPONENTS_CUSTOM_PATH_TYPES // it should be a build system define
 #endif
-        count, // Important to be last
+    count, // Important to be last
 };
 
 template <EnumTypes ComponentE>
@@ -69,4 +68,10 @@ struct Id2Type<EnumTypes::Controlable>
 {
     using Type = Controlable;
 };
+
 } // namespace lbr::ecs::components
+
+// It must be injected outside the namespace
+#ifdef ECS_COMPONENTS_CUSTOM
+#include ECS_COMPONENTS_CUSTOM_PATH_IMPL // it should be a build system define
+#endif
