@@ -2,9 +2,9 @@ set(module_name ECS)
 
 set(public_headers "Components.hpp;Entity.hpp;Lookup.hpp")
 set(private_headers "")
-set(tests "")
 set(detail_headers "Lookup.hxx")
 set(sources "Lookup.cpp")
+set(tests "Test_Lookup.cpp")
 
 set(public_deps "Utilities")
 set(private_deps "third_party")
