@@ -1,12 +1,12 @@
-set(module_name SmartResource)
+set(module_name HelpersSDL)
 
-set(public_headers "SmartResource.hpp")
+set(public_headers "Utils.hpp;SmartSDL.hpp")
 set(private_headers "")
-set(detail_headers "SmartResource.hxx")
-set(sources "")
+set(detail_headers "")
+set(sources "Utils.cpp")
 set(tests "")
 
-set(public_deps "third_party")
+set(public_deps "SmartResource;third_party")
 set(private_deps "")
 set(test_deps "")
 
