@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ECS/Components.hpp"
-#include "ECS/Entity.hpp"
-#include "Utilities/ConditLock.hpp"
+#include "Libero/ECS/Components.hpp"
+#include "Libero/ECS/Entity.hpp"
+#include "Libero/Utilities/ConditLock.hpp"
 #include "detail/Lookup.hxx"
 
 #include <cassert>

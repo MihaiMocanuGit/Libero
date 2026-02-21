@@ -1,5 +1,5 @@
 
-#include "SmartResource/SmartResource.hpp"
+#include "Libero/SmartResource/SmartResource.hpp"
 
 #include <SDL3/SDL_render.h>
 

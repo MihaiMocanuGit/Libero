@@ -1,6 +1,6 @@
-#include "ECS/Lookup.hpp"
+#include "Libero/ECS/Lookup.hpp"
 
-#include "ECS/Entity.hpp"
+#include "Libero/ECS/Entity.hpp"
 
 namespace lbr::ecs::lookup
 {

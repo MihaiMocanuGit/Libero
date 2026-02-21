@@ -12,11 +12,11 @@ set(test_deps "")
 
 set(include_dir "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 set(private_dir "${CMAKE_CURRENT_SOURCE_DIR}/src/private/")
-set(detail_dir "${CMAKE_CURRENT_SOURCE_DIR}/include/${module_name}/detail/")
+set(detail_dir "${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}/${module_name}/detail/")
 set(src_dir "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 set(test_dir "${CMAKE_CURRENT_SOURCE_DIR}/tests/")
 
-list(TRANSFORM public_headers PREPEND "${include_dir}/${module_name}/")
+list(TRANSFORM public_headers PREPEND "${include_dir}/${PROJECT_NAME}/${module_name}/")
 list(TRANSFORM private_headers PREPEND "${private_dir}")
 list(TRANSFORM detail_headers PREPEND "${detail_dir}")
 list(TRANSFORM sources PREPEND "${src_dir}")

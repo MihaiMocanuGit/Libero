@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utilities/Vec.hpp"
+#include "Libero/Utilities/Vec.hpp"
 
 #include <concepts>
 namespace lbr::ecs::components

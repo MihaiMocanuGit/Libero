@@ -1,7 +1,7 @@
-#include "ECS/Components.hpp"
-#include "ECS/Entity.hpp"
-#include "ECS/Lookup.hpp"
-#include "Utilities/Vec.hpp"
+#include "Libero/ECS/Components.hpp"
+#include "Libero/ECS/Entity.hpp"
+#include "Libero/ECS/Lookup.hpp"
+#include "Libero/Utilities/Vec.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 #include <numeric>
