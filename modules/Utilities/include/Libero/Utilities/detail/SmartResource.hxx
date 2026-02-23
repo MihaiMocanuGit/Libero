@@ -2,7 +2,7 @@
 
 #include "../SmartResource.hpp"
 
-namespace lbr::smartresource
+namespace lbr::utl
 {
 template <typename Resource, void CleanupFunction(Resource *)>
 SmartResource<Resource, CleanupFunction>::SmartResource(Resource *res) noexcept : res {res}
@@ -43,4 +43,4 @@ Resource *SmartResource<Resource, CleanupFunction>::release() noexcept
     return moved;
 }
 
-} // namespace lbr::smartresource
+} // namespace lbr::utl

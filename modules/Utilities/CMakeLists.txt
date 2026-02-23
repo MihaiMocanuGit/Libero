@@ -1,8 +1,8 @@
 set(module_name Utilities)
 
-set(public_headers "Vec.hpp;ConditLock.hpp")
+set(public_headers "Vec.hpp;ConditLock.hpp;SmartResource.hpp")
 set(private_headers "")
-set(detail_headers "Vec.hxx")
+set(detail_headers "Vec.hxx;SmartResource.hxx")
 set(sources "")
 set(tests "TestVec.cpp")
 

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace lbr::smartresource
+namespace lbr::utl
 {
 template <typename Resource, void CleanupFunction(Resource *)>
 struct SmartResource
@@ -24,6 +24,6 @@ struct SmartResource
     Resource *release() noexcept;
 };
 
-} // namespace lbr::smartresource
+} // namespace lbr::utl
 
 #include "detail/SmartResource.hxx"

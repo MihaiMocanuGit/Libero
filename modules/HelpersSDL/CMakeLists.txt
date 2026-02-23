@@ -6,7 +6,7 @@ set(detail_headers "")
 set(sources "Utils.cpp")
 set(tests "")
 
-set(public_deps "SmartResource;third_party")
+set(public_deps "Utilities;third_party")
 set(private_deps "")
 set(test_deps "")
 
