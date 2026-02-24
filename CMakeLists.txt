@@ -12,14 +12,14 @@ endif(WIN32)
 
 set(gcc_errors "-Wall -Wextra -Wpedantic")
 set(gcc_warnings "-Wno-error=unused-variable -Wno-error=unused-parameter \
-    -Wno-error=unused-function -Wno-error=unused-but-set-variable") 
+    -Wno-error=unused-function -Wno-error=unused-but-set-variable")
 set(gcc_sanitizers "-fsanitize=address,undefined")
 
-set(gcc_flags_debug "-O0 -ggdb3 ${GCC_ERRORS} ${GCC_WARNINGS} ${GCC_SANITIZERS}")
-set(gcc_link_flags_debug "${GCC_SANITIZERS}")
+set(gcc_flags_debug "-O0 -ggdb3 -flto ${gcc_errors} ${gcc_warnings} ${gcc_sanitizers}")
+set(gcc_link_flags_debug "-flto ${gcc_sanitiZERS}")
 
-set(gcc_flags_release "-O3")
-set(gcc_link_flags_release "")
+set(gcc_flags_release "-O3 -flto")
+set(gcc_link_flags_release "-flto")
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${gcc_flags_debug}")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${gcc_link_flags_debug} ")
@@ -28,7 +28,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${gcc_flags_release}")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${gcc_link_flags_release} ")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink 
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
     ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json)
 
 enable_testing()

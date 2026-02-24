@@ -6,7 +6,7 @@ set(detail_headers "Lookup.hxx")
 set(sources "Lookup.cpp")
 set(tests "Test_Lookup.cpp")
 
-set(public_deps "Utilities")
+set(public_deps "Utilities;HelpersSDL")
 set(private_deps "third_party")
 set(test_deps "")
 

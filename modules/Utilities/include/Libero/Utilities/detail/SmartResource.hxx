@@ -5,19 +5,19 @@
 namespace lbr::utl
 {
 template <typename Resource, void CleanupFunction(Resource *)>
-SmartResource<Resource, CleanupFunction>::SmartResource(Resource *res) noexcept : res {res}
+inline SmartResource<Resource, CleanupFunction>::SmartResource(Resource *res) noexcept : res {res}
 {
 }
 
 template <typename Resource, void CleanupFunction(Resource *)>
-SmartResource<Resource, CleanupFunction>::SmartResource(SmartResource &&other) noexcept
+inline SmartResource<Resource, CleanupFunction>::SmartResource(SmartResource &&other) noexcept
 {
     this->res = other.res;
     other.res = nullptr;
 };
 
 template <typename Resource, void CleanupFunction(Resource *)>
-SmartResource<Resource, CleanupFunction> &
+inline SmartResource<Resource, CleanupFunction> &
     SmartResource<Resource, CleanupFunction>::operator=(SmartResource &&other) noexcept
 {
     if (this != &other)
@@ -29,14 +29,14 @@ SmartResource<Resource, CleanupFunction> &
 }
 
 template <typename Resource, void CleanupFunction(Resource *)>
-SmartResource<Resource, CleanupFunction>::~SmartResource() noexcept
+inline SmartResource<Resource, CleanupFunction>::~SmartResource() noexcept
 {
     if (res != nullptr)
         CleanupFunction(res);
 }
 
 template <typename Resource, void CleanupFunction(Resource *)>
-Resource *SmartResource<Resource, CleanupFunction>::release() noexcept
+inline Resource *SmartResource<Resource, CleanupFunction>::release() noexcept
 {
     auto moved = res;
     res = nullptr;

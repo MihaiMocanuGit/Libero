@@ -114,21 +114,21 @@ class Lookup
 };
 
 template <bool LockCond, components::IsComponent T>
-size_t Lookup::numberOfComponents() const noexcept
+inline size_t Lookup::numberOfComponents() const noexcept
 {
     shrLock<LockCond> compLock {m_getCompVec<T>().mtx};
     return m_getCompVec<T>().components.size();
 }
 
 template <bool LockCond>
-size_t Lookup::numberOfEntities() const noexcept
+inline size_t Lookup::numberOfEntities() const noexcept
 {
     shrLock<LockCond> entLock {m_entities.mtx};
     return m_entities.data.size();
 }
 
 template <bool LockCond>
-void Lookup::removeEntities(std::vector<entity::eid> eids)
+inline void Lookup::removeEntities(std::vector<entity::eid> eids)
 {
     if (eids.empty())
         return;
@@ -197,19 +197,19 @@ void Lookup::removeEntities(std::vector<entity::eid> eids)
 };
 
 template <components::EnumTypes N>
-auto &Lookup::m_getCompVec()
+inline auto &Lookup::m_getCompVec()
 {
     return m_getCompVec<typename components::Id2Type<N>::Type>();
 }
 
 template <components::EnumTypes N>
-const auto &Lookup::m_getCompVec() const
+inline const auto &Lookup::m_getCompVec() const
 {
     return m_getCompVec<typename components::Id2Type<N>::Type>();
 }
 
 template <bool LockCond>
-entity::Entity Lookup::createEntity() noexcept
+inline entity::Entity Lookup::createEntity() noexcept
 {
     unqLock<LockCond> _ {m_entities.mtx};
     entity::eid id = m_entities.data.size();
@@ -218,14 +218,14 @@ entity::Entity Lookup::createEntity() noexcept
 };
 
 template <bool LockCond, components::IsComponent T>
-bool Lookup::hasComponent(entity::eid eid) const
+inline bool Lookup::hasComponent(entity::eid eid) const
 {
     shrLock<LockCond> lockEnt {m_entities.mtx};
     return m_entities.data[eid].contains(T::id);
 }
 
 template <bool LockCond, components::IsComponent T, components::IsComponent... Ts>
-void Lookup::modifyGroupOfComponents(std::invocable<entity::Entity, T &, Ts &...> auto funct)
+inline void Lookup::modifyGroupOfComponents(std::invocable<entity::Entity, T &, Ts &...> auto funct)
 {
     constexpr unsigned NO_TYPES = 1 + sizeof...(Ts);
 
@@ -270,7 +270,7 @@ void Lookup::modifyGroupOfComponents(std::invocable<entity::Entity, T &, Ts &...
 }
 
 template <bool LockCond, components::IsComponent T, components::IsComponent... Ts>
-void Lookup::readGroupOfComponents(
+inline void Lookup::readGroupOfComponents(
     std::invocable<entity::Entity, const T &, const Ts &...> auto funct) const
 {
     constexpr unsigned NO_TYPES = 1 + sizeof...(Ts);
@@ -311,7 +311,7 @@ void Lookup::readGroupOfComponents(
 }
 
 template <bool LockCond, components::IsComponent T>
-void Lookup::readAllComponents(std::invocable<const T &> auto funct) const
+inline void Lookup::readAllComponents(std::invocable<const T &> auto funct) const
 {
     const auto &compVec = m_getCompVec<T>();
     shrLock<LockCond> lockComp {compVec.mtx};
@@ -320,7 +320,7 @@ void Lookup::readAllComponents(std::invocable<const T &> auto funct) const
 }
 
 template <bool LockCond, components::IsComponent T>
-void Lookup::modifyAllComponents(std::invocable<T &> auto funct)
+inline void Lookup::modifyAllComponents(std::invocable<T &> auto funct)
 {
     auto &compVec = m_getCompVec<T>();
     unqLock<LockCond> lockComp {compVec.mtx};
@@ -329,7 +329,7 @@ void Lookup::modifyAllComponents(std::invocable<T &> auto funct)
 }
 
 template <bool LockCond, components::IsComponent T>
-bool Lookup::readComponent(entity::eid eid, std::invocable<const T &> auto readFunct) const
+inline bool Lookup::readComponent(entity::eid eid, std::invocable<const T &> auto readFunct) const
 {
     const auto &compVec = m_getCompVec<T>();
     CompCIt compIt;
@@ -345,19 +345,19 @@ bool Lookup::readComponent(entity::eid eid, std::invocable<const T &> auto readF
 }
 
 template <components::IsComponent T>
-const auto &Lookup::m_getCompVec() const
+inline const auto &Lookup::m_getCompVec() const
 {
     return std::get<detail::ComponentData<std::decay_t<T>::id>>(m_components);
 }
 
 template <components::IsComponent T>
-auto &Lookup::m_getCompVec()
+inline auto &Lookup::m_getCompVec()
 {
     return std::get<detail::ComponentData<std::decay_t<T>::id>>(m_components);
 }
 
 template <bool LockCond, components::IsComponent T>
-bool Lookup::removeComponent(CompIt compIt)
+inline bool Lookup::removeComponent(CompIt compIt)
 {
     auto &compVec = m_getCompVec<T>();
     unqLock<LockCond> lockComp {compVec.mtx};
@@ -379,7 +379,7 @@ bool Lookup::removeComponent(CompIt compIt)
 }
 
 template <bool LockCond, components::IsComponent T>
-bool Lookup::removeComponent_eid(entity::eid eid)
+inline bool Lookup::removeComponent_eid(entity::eid eid)
 {
     CompIt compIt;
     {
@@ -393,13 +393,13 @@ bool Lookup::removeComponent_eid(entity::eid eid)
 }
 
 template <bool LockCond, components::IsComponent... Ts>
-void Lookup::assignComponents(entity::eid eid, Ts &&...comps)
+inline void Lookup::assignComponents(entity::eid eid, Ts &&...comps)
 {
     ((assignComponents<LockCond>(eid, std::forward<Ts>(comps))), ...);
 }
 
 template <bool LockCond, components::IsComponent T>
-void Lookup::assignComponents(entity::eid eid, T &&comp)
+inline void Lookup::assignComponents(entity::eid eid, T &&comp)
 {
     auto &compVec = m_getCompVec<T>();
     components::EnumTypes compId = comp.id;
