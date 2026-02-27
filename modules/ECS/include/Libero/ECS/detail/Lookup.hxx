@@ -13,6 +13,7 @@
 namespace lbr::ecs::lookup::detail
 {
 
+using namespace lbr::ecs;
 namespace ComponentVectorIt
 {
 // while they are identical, different names are used to signal the intent
@@ -26,32 +27,33 @@ using iterator = entity::eid;
 using citerator = iterator;
 } // namespace EntityVectorIt
 
-template <components::EnumTypes E>
+template <components::EMetaType EMT, EMT EType>
 struct ComponentData
 {
     mutable std::shared_mutex mtx;
-    std::vector<typename components::Id2Type<E>::Type> components;
+    std::vector<typename components::EType2CType<EMT, EType>::CType> components;
     std::vector<entity::eid> entityRefs;
 };
 
+template <components::EMetaType EMT>
 struct Entities
 {
     mutable std::shared_mutex mtx;
-    using CompRefT = boost::container::flat_map<components::EnumTypes, ComponentVectorIt::iterator>;
+    using CompRefT = boost::container::flat_map<EMT, ComponentVectorIt::iterator>;
     std::vector<CompRefT> data;
     entity::Entity entity(entity::eid eid) const { return {.id = eid}; }
 };
 
+template <components::EMetaType EMT>
 struct CompList
 {
   private:
-    template <components::EnumTypes N, template <components::EnumTypes> class DataWrapper>
+    template <EMT EType, template <components::EMetaType, EMT> class DataWrapper>
     struct Node
     {
       private:
-        using NodeDataType = DataWrapper<N>;
-        static constexpr auto NextEnumType =
-            static_cast<components::EnumTypes>(std::to_underlying(N) + 1);
+        using NodeDataType = DataWrapper<EMT, EType>;
+        static constexpr auto NextEnumType = static_cast<EMT>(std::to_underlying(EType) + 1);
 
       public:
         using Type = decltype(std::tuple_cat(
@@ -60,22 +62,22 @@ struct CompList
     };
 
     // End
-    template <template <components::EnumTypes> class DataWrapper>
-    struct Node<components::EnumTypes::count, DataWrapper>
+    template <template <components::EMetaType, EMT> class DataWrapper>
+    struct Node<EMT::countEType, DataWrapper>
     {
         using Type = std::tuple<>;
     };
 
-    static constexpr components::EnumTypes FirstEnumType = static_cast<components::EnumTypes>(0);
+    static constexpr EMT FirstEnumType = static_cast<EMT>(0);
 
   public:
-    template <components::EnumTypes N>
+    template <EMT EType>
     struct Identity
     {
-        static constexpr components::EnumTypes x = N;
+        static constexpr EMT x = EType;
     };
 
-    template <template <components::EnumTypes> class DataWrapper = Identity>
+    template <template <components::EMetaType, EMT> class DataWrapper = Identity>
     using Root = Node<FirstEnumType, DataWrapper>::Type;
 };
 

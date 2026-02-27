@@ -3,11 +3,11 @@ set(module_name ECS)
 set(public_headers "Components.hpp;Entity.hpp;Lookup.hpp")
 set(private_headers "")
 set(detail_headers "Lookup.hxx")
-set(sources "Lookup.cpp")
+set(sources "")
 set(tests "Test_Lookup.cpp")
 
 set(public_deps "Utilities;HelpersSDL")
-set(private_deps "third_party")
+set(private_deps "")
 set(test_deps "")
 
 set(include_dir "${CMAKE_CURRENT_SOURCE_DIR}/include/")

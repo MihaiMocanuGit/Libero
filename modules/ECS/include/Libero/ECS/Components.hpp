@@ -3,75 +3,53 @@
 #include "Libero/Utilities/Vec.hpp"
 
 #include <concepts>
+#include <cstdint>
+#include <type_traits>
+#include <utility>
 namespace lbr::ecs::components
 {
-enum class EnumTypes
-{
-    Transform = 0,
-    Boundary,
-    Controlable,
-#ifdef ECS_COMPONENTS_CUSTOM              // it should be a build system define
-#include ECS_COMPONENTS_CUSTOM_PATH_TYPES // it should be a build system define
-#endif
-    count, // Important to be last
+
+using UnderlyingEMetaType = uint8_t;
+
+template <typename EMT>
+concept EMetaType = requires {
+    requires std::is_enum_v<EMT>;
+    requires std::same_as<std::underlying_type_t<EMT>, UnderlyingEMetaType>;
+    { EMT::countEType };
+    // TODO: check that countEType's value and its own position in EMT coincide
 };
 
-template <EnumTypes ComponentE>
-struct Id2Type;
-
-template <class CompT>
-concept IsComponent = requires {
-    { std::decay_t<CompT>::id } -> std::convertible_to<EnumTypes>;
+template <EMetaType EMT, EMT EType>
+struct EType2CType
+{
+    // using CType = CType_void;
+    static_assert(false, "Trying to use unspecialized template");
 };
 
-struct Transform
+namespace detail
 {
-    static constexpr EnumTypes id {EnumTypes::Transform};
-    utl::Vec3f pos;
-    // uint8_t padding1;
-    utl::Vec3f rot;
-    // uint8_t padding2;
-    utl::Vec3f size;
-    // uint8_t padding2;
-};
-template <>
-struct Id2Type<EnumTypes::Transform>
+template <EMetaType EMT, class CT>
+consteval bool ExistsETypeWithCType()
 {
-    using Type = Transform;
-};
-
-struct Boundary
-{
-    static constexpr EnumTypes id {EnumTypes::Boundary};
-    enum class Type
+    return []<std::size_t... ETypes>(std::index_sequence<ETypes...>) -> bool
     {
-        BOX,              // lengths equal to size
-        CYLINDRICAL,      // r=max(x1,x2), h=x3
-        ELIPTIC_CYLINDER, // a=x1, b=x2, h=x3
-    } type;
-    utl::Vec3f size;
+        return (std::same_as<typename EType2CType<EMT, static_cast<EMT>(ETypes)>::CType, CT> ||
+                ...);
+    }();
 };
-template <>
-struct Id2Type<EnumTypes::Boundary>
-{
-    using Type = Boundary;
+}; // namespace detail
+
+template <class CT, typename EMT>
+concept CType = requires {
+    requires EMetaType<EMT>;
+    detail::ExistsETypeWithCType<EMT, CT>();
 };
 
-struct Controlable
+template <EMetaType EMT, CType<EMT> T>
+struct CType2EType
 {
-    static constexpr EnumTypes id {EnumTypes::Controlable};
-    bool userControlled;
-    utl::Vec3f stepSize;
-};
-template <>
-struct Id2Type<EnumTypes::Controlable>
-{
-    using Type = Controlable;
+    // static constexpr EnumTypes EType = EnumTypes::voidE;
+    static_assert(false, "Trying to use unspecialized template");
 };
 
 } // namespace lbr::ecs::components
-
-// It must be injected outside the namespace
-#ifdef ECS_COMPONENTS_CUSTOM
-#include ECS_COMPONENTS_CUSTOM_PATH_IMPL // it should be a build system define
-#endif
