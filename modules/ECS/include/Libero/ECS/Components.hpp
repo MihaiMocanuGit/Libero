@@ -6,15 +6,17 @@
 #include <cstdint>
 #include <type_traits>
 #include <utility>
+
+namespace lbr::ecs{
+using SizeEType = uint8_t;
+}
+
 namespace lbr::ecs::components
 {
-
-using UnderlyingEMetaType = uint8_t;
-
 template <typename EMT>
 concept EMetaType = requires {
     requires std::is_enum_v<EMT>;
-    requires std::same_as<std::underlying_type_t<EMT>, UnderlyingEMetaType>;
+    requires std::same_as<std::underlying_type_t<EMT>, SizeEType>;
     { EMT::countEType };
     // TODO: check that countEType's value and its own position in EMT coincide
 };

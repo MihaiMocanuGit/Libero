@@ -16,7 +16,7 @@ using namespace lbr::ecs::lookup;
 // grouped under the same namespace
 namespace lbr::ecs::components
 {
-enum class EnumTypes : UnderlyingEMetaType
+enum class EnumTypes : SizeEType
 {
     Transform = 0, // The first field must start at 0. An enum with only countEType = 0 is also
                    // valid, albeit untested.
