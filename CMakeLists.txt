@@ -18,7 +18,7 @@ set(gcc_sanitizers "-fsanitize=address,undefined")
 set(gcc_flags_debug "-O0 -ggdb3 -flto ${gcc_errors} ${gcc_warnings} ${gcc_sanitizers}")
 set(gcc_link_flags_debug "-flto ${gcc_sanitiZERS}")
 
-set(gcc_flags_release "-O3 -flto ${gcc_errors} ${gcc_warnings}")
+set(gcc_flags_release "-O3 -march=native -flto ${gcc_errors} ${gcc_warnings}")
 set(gcc_link_flags_release "-flto")
 # Profiling Config
 #set(gcc_flags_release "-O2 -g ${gcc_errors} ${gcc_warnings}")
