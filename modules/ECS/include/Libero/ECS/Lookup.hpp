@@ -187,14 +187,15 @@ inline void Lookup<EMT>::modifyGroupOfComponents(
     std::invocable<entity::Entity, T &, Ts &...> auto modifyFunct)
 {
     // Lock all given components
-    auto lockComps = utl::makeConditScopedLock<LockCond>(
+    [[maybe_unused]] auto lockComps = utl::makeConditScopedLock<LockCond>(
         m_components.template getMutex<components::CType2EType<EMT, T>::EType>(),
         m_components.template getMutex<components::CType2EType<EMT, Ts>::EType>()...);
     shrLock<LockCond> lockEnt {m_entities.getMutex()};
 
     // Find the minimal component set to iterate over
     static constexpr EMT EType {components::CType2EType<EMT, T>::EType};
-    SizeEid minSize {m_components.template size<EType>()};
+    [[maybe_unused]] SizeEid minSize {
+        m_components.template size<EType>()}; // TODO: False positive for unused warning?
     EMT minEType {EType};
     (
         [&]
@@ -270,7 +271,8 @@ inline void Lookup<EMT>::readGroupOfComponents(
 
     // Find the minimal component set to iterate over
     static constexpr EMT EType {components::CType2EType<EMT, T>::EType};
-    SizeEid minSize {m_components.template size<EType>()};
+    [[maybe_unused]] SizeEid minSize {
+        m_components.template size<EType>()}; // TODO: False positive for unused warning?
     EMT minEType {EType};
     (
         [&]
