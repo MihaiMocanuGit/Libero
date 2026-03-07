@@ -301,6 +301,61 @@ TEST_CASE("Remove entities", "[ECS][Lookup]")
                                                  { REQUIRE(ent.id < NO_ENT); });
     }
 
+    SECTION("Remove a single one")
+    {
+        SECTION("The first one")
+        {
+            lk.removeEntities<true>({0});
+            REQUIRE(lk.numberOfEntities<true>() == NO_ENT - 1);
+            REQUIRE(lk.numberOfComponents<true, Transform>() == lk.numberOfEntities<true>());
+            REQUIRE(lk.numberOfComponents<true, Boundary>() == NO_ENT / 2 - 1);
+
+            lk.readGroupOfComponents<true, Transform>([](Entity ent, const auto &)
+                                                      { REQUIRE(ent.id < NO_ENT); });
+            lk.readGroupOfComponents<true, Boundary>([](Entity ent, const auto &)
+                                                     { REQUIRE(ent.id < NO_ENT); });
+        }
+
+        SECTION("The last one")
+        {
+            lk.removeEntities<true>({NO_ENT - 1});
+            REQUIRE(lk.numberOfEntities<true>() == NO_ENT - 1);
+            REQUIRE(lk.numberOfComponents<true, Transform>() == lk.numberOfEntities<true>());
+            REQUIRE(lk.numberOfComponents<true, Boundary>() == NO_ENT / 2);
+
+            lk.readGroupOfComponents<true, Transform>([](Entity ent, const auto &)
+                                                      { REQUIRE(ent.id < NO_ENT); });
+            lk.readGroupOfComponents<true, Boundary>([](Entity ent, const auto &)
+                                                     { REQUIRE(ent.id < NO_ENT); });
+        }
+
+        SECTION("The last one with boundary")
+        {
+            lk.removeEntities<true>({NO_ENT / 2 - 1});
+            REQUIRE(lk.numberOfEntities<true>() == NO_ENT - 1);
+            REQUIRE(lk.numberOfComponents<true, Transform>() == lk.numberOfEntities<true>());
+            REQUIRE(lk.numberOfComponents<true, Boundary>() == NO_ENT / 2 - 1);
+
+            lk.readGroupOfComponents<true, Transform>([](Entity ent, const auto &)
+                                                      { REQUIRE(ent.id < NO_ENT); });
+            lk.readGroupOfComponents<true, Boundary>([](Entity ent, const auto &)
+                                                     { REQUIRE(ent.id < NO_ENT); });
+        }
+
+        SECTION("The first one without boundary")
+        {
+            lk.removeEntities<true>({NO_ENT / 2});
+            REQUIRE(lk.numberOfEntities<true>() == NO_ENT - 1);
+            REQUIRE(lk.numberOfComponents<true, Transform>() == lk.numberOfEntities<true>());
+            REQUIRE(lk.numberOfComponents<true, Boundary>() == NO_ENT / 2);
+
+            lk.readGroupOfComponents<true, Transform>([](Entity ent, const auto &)
+                                                      { REQUIRE(ent.id < NO_ENT); });
+            lk.readGroupOfComponents<true, Boundary>([](Entity ent, const auto &)
+                                                     { REQUIRE(ent.id < NO_ENT); });
+        }
+    }
+
     SECTION("Remove all")
     {
         std::vector<eid> eids(NO_ENT, 0);
@@ -328,6 +383,37 @@ TEST_CASE("Remove entities", "[ECS][Lookup]")
         lk.readGroupOfComponents<true, Boundary>([](Entity, const auto &) { REQUIRE(false); });
     }
 
+    SECTION("Remove second half")
+    {
+        std::vector<eid> eids(NO_ENT / 2, 0);
+        std::iota(eids.begin(), eids.end(), NO_ENT / 2);
+        lk.removeEntities<true>(eids);
+        REQUIRE(lk.numberOfEntities<true>() == NO_ENT - eids.size());
+        REQUIRE(lk.numberOfComponents<true, Transform>() == lk.numberOfEntities<true>());
+        REQUIRE(lk.numberOfComponents<true, Boundary>() == NO_ENT / 2);
+
+        lk.readGroupOfComponents<true, Transform>(
+            [&lk](Entity ent, const auto &) { REQUIRE(ent.id < lk.numberOfEntities<false>()); });
+        lk.readGroupOfComponents<true, Boundary>(
+            [&lk](Entity ent, const auto &) { REQUIRE(ent.id < lk.numberOfEntities<false>()); });
+    }
+
+    SECTION("Remove alternating")
+    {
+        std::vector<eid> eids(NO_ENT, 0);
+        std::iota(eids.begin(), eids.end(), 0);
+        eids.erase(std::remove_if(eids.begin(), eids.end(), [](eid x) { return x % 2 == 1; }),
+                   eids.end());
+        lk.removeEntities<true>(eids);
+        REQUIRE(lk.numberOfEntities<true>() == NO_ENT / 2 + NO_ENT % 2);
+        REQUIRE(lk.numberOfComponents<true, Transform>() == NO_ENT / 2 + NO_ENT % 2);
+        REQUIRE(lk.numberOfComponents<true, Boundary>() == NO_ENT / 4 + NO_ENT % 2);
+
+        lk.readGroupOfComponents<true, Transform>(
+            [&lk](Entity ent, const auto &) { REQUIRE(ent.id < lk.numberOfEntities<false>()); });
+        lk.readGroupOfComponents<true, Boundary>(
+            [&lk](Entity ent, const auto &) { REQUIRE(ent.id < lk.numberOfEntities<false>()); });
+    }
     SECTION("Remove single, but repeated eid")
     {
         std::vector<eid> eids(NO_ENT, 0);
