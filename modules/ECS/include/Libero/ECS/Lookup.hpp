@@ -12,9 +12,9 @@
 #include <type_traits>
 #include <utility>
 
-namespace lbr::ecs::lookup
+namespace lbr::ecs
 {
-template <components::EMetaType EMT>
+template <EMetaType EMT>
 class Lookup
 {
   public:
@@ -27,60 +27,59 @@ class Lookup
     Lookup &operator=(const Lookup &) = delete;
 
     template <bool LockCond>
-    entity::Entity createEntity() noexcept;
+    Entity createEntity() noexcept;
 
-    template <bool LockCond, components::CType<EMT> T>
-    void assignComponents(entity::eid eid, T &&comp);
-    template <bool LockCond, components::CType<EMT> T, typename... Args>
+    template <bool LockCond, CType<EMT> T>
+    void assignComponents(Entity::eid eid, T &&comp);
+    template <bool LockCond, CType<EMT> T, typename... Args>
         requires std::is_constructible_v<T, Args...>
-    void assignComponent(entity::eid eid, Args &&...args);
-    template <bool LockCond, components::CType<EMT>... Ts>
-    void assignComponents(entity::eid eid, Ts &&...comps);
+    void assignComponent(Entity::eid eid, Args &&...args);
+    template <bool LockCond, CType<EMT>... Ts>
+    void assignComponents(Entity::eid eid, Ts &&...comps);
 
-    template <bool LockCond, components::CType<EMT> T>
-    bool hasComponent(entity::eid eid) const;
+    template <bool LockCond, CType<EMT> T>
+    bool hasComponent(Entity::eid eid) const;
 
-    template <bool LockCond, components::CType<EMT> T>
-    bool removeComponent_eid(entity::eid eid);
+    template <bool LockCond, CType<EMT> T>
+    bool removeComponent_eid(Entity::eid eid);
     template <bool LockCond>
-    bool removeComponent_eid(entity::eid eid);
-    template <bool LockCond, components::CType<EMT> T>
+    bool removeComponent_eid(Entity::eid eid);
+    template <bool LockCond, CType<EMT> T>
     bool removeComponent(SizeEid compIt);
 
-    template <bool LockCond, components::CType<EMT> T>
-    bool readComponent(entity::eid eid, std::invocable<const T &> auto readFunct) const;
+    template <bool LockCond, CType<EMT> T>
+    bool readComponent(Entity::eid eid, std::invocable<const T &> auto readFunct) const;
     /**
      * \note It won't propagate the current Entity as this would force an undesired lock on
      * entities. Use readGroupOfComponents<T>() instead.
      */
-    template <bool LockCond, components::CType<EMT> T>
+    template <bool LockCond, CType<EMT> T>
     void readAllComponents(std::invocable<const T &> auto funct) const;
-    template <bool LockCond, components::CType<EMT> T, components::CType<EMT>... Ts>
-    void readGroupOfComponents(
-        std::invocable<entity::Entity, const T &, const Ts &...> auto funct) const;
+    template <bool LockCond, CType<EMT> T, CType<EMT>... Ts>
+    void readGroupOfComponents(std::invocable<Entity, const T &, const Ts &...> auto funct) const;
 
-    template <bool LockCond, components::CType<EMT> T>
-    bool modifyComponent(entity::eid eid, std::invocable<T &> auto readFunct);
-    template <bool LockCond, components::CType<EMT> T>
+    template <bool LockCond, CType<EMT> T>
+    bool modifyComponent(Entity::eid eid, std::invocable<T &> auto readFunct);
+    template <bool LockCond, CType<EMT> T>
     void modifyAllComponents(std::invocable<T &> auto funct);
-    // TODO: Transform the components::CType<EMT> pack by removing the repeated types and sorting
+    // TODO: Transform the CType<EMT> pack by removing the repeated types and sorting
     // it in a predefined order. (In order to avoid cyclic deadlocks)
-    template <bool LockCond, components::CType<EMT> T, components::CType<EMT>... Ts>
-    void modifyGroupOfComponents(std::invocable<entity::Entity, T &, Ts &...> auto funct);
+    template <bool LockCond, CType<EMT> T, CType<EMT>... Ts>
+    void modifyGroupOfComponents(std::invocable<Entity, T &, Ts &...> auto funct);
 
     /**
-     * \brief Removes the given set of entity ids. It is recommended for this step to be the last
+     * \brief Removes the given set of Entity ids. It is recommended for this step to be the last
      * one in frame.
-     * \note The previous entity eids will get invalidated. More precisely, they will be mapped into
+     * \note The previous Entity eids will get invalidated. More precisely, they will be mapped into
      * the [0, noOfEntities) range
      */
     template <bool LockCond>
-    void removeEntities(std::vector<entity::eid> eids);
+    void removeEntities(std::vector<Entity::eid> eids);
 
     template <bool LockCond>
     size_t numberOfEntities() const noexcept;
 
-    template <bool LockCond, components::CType<EMT> T>
+    template <bool LockCond, CType<EMT> T>
     size_t numberOfComponents() const noexcept;
 
   private:
@@ -93,23 +92,23 @@ class Lookup
     detail::Components<EMT> m_components;
 };
 
-template <components::EMetaType EMT>
+template <EMetaType EMT>
 Lookup<EMT>::Lookup(SizeEid entitiesReserve, SizeEid componentsReserve) noexcept
 {
     m_entities.reserve(entitiesReserve);
     m_components.reserve(componentsReserve);
 }
 
-template <components::EMetaType EMT>
-template <bool LockCond, components::CType<EMT> T>
+template <EMetaType EMT>
+template <bool LockCond, CType<EMT> T>
 inline size_t Lookup<EMT>::numberOfComponents() const noexcept
 {
-    static constexpr EMT EType {components::CType2EType<EMT, T>::EType};
+    static constexpr EMT EType {CType2EType<EMT, T>::EType};
     shrLock<LockCond> compLock {m_components.template getMutex<EType>()};
     return m_components.template size<EType>();
 }
 
-template <components::EMetaType EMT>
+template <EMetaType EMT>
 template <bool LockCond>
 inline size_t Lookup<EMT>::numberOfEntities() const noexcept
 {
@@ -117,9 +116,9 @@ inline size_t Lookup<EMT>::numberOfEntities() const noexcept
     return m_entities.size();
 }
 
-template <components::EMetaType EMT>
+template <EMetaType EMT>
 template <bool LockCond>
-inline void Lookup<EMT>::removeEntities(std::vector<entity::eid> eids)
+inline void Lookup<EMT>::removeEntities(std::vector<Entity::eid> eids)
 {
     if (eids.empty())
         return;
@@ -144,8 +143,8 @@ inline void Lookup<EMT>::removeEntities(std::vector<entity::eid> eids)
         // TODO: define a prepareRemoveComponent, so that one large remove can be made at the end,
         // instead of eids.Size() removes
         removeComponent_eid<false>(current);
-        // at this point, the eid should have no components. Now swap the entity with the next end
-        // position and update the refs of the moved entity.
+        // at this point, the eid should have no Components. Now swap the Entity with the next end
+        // position and update the refs of the moved Entity.
         m_entities.swapEnd(current, i);
         [&]<SizeEType... IETypes>(std::integer_sequence<SizeEType, IETypes...>)
         {
@@ -164,43 +163,43 @@ inline void Lookup<EMT>::removeEntities(std::vector<entity::eid> eids)
     m_entities.removeLast(eids.size());
 };
 
-template <components::EMetaType EMT>
+template <EMetaType EMT>
 template <bool LockCond>
-inline entity::Entity Lookup<EMT>::createEntity() noexcept
+inline Entity Lookup<EMT>::createEntity() noexcept
 {
     unqLock<LockCond> entLock {m_entities.getMutex()};
-    return entity::Entity {.id = m_entities.create()};
+    return Entity {.id = m_entities.create()};
 };
 
-template <components::EMetaType EMT>
-template <bool LockCond, components::CType<EMT> T>
-inline bool Lookup<EMT>::hasComponent(entity::eid eid) const
+template <EMetaType EMT>
+template <bool LockCond, CType<EMT> T>
+inline bool Lookup<EMT>::hasComponent(Entity::eid eid) const
 {
-    static constexpr EMT EType {components::CType2EType<EMT, T>::EType};
+    static constexpr EMT EType {CType2EType<EMT, T>::EType};
     shrLock<LockCond> entLock {m_entities.getMutex()};
     return m_entities.template containsComponents<EType>(eid);
 }
 
-template <components::EMetaType EMT>
-template <bool LockCond, components::CType<EMT> T, components::CType<EMT>... Ts>
-inline void Lookup<EMT>::modifyGroupOfComponents(
-    std::invocable<entity::Entity, T &, Ts &...> auto modifyFunct)
+template <EMetaType EMT>
+template <bool LockCond, CType<EMT> T, CType<EMT>... Ts>
+inline void
+    Lookup<EMT>::modifyGroupOfComponents(std::invocable<Entity, T &, Ts &...> auto modifyFunct)
 {
-    // Lock all given components
+    // Lock all given Components
     [[maybe_unused]] auto lockComps = utl::makeConditScopedLock<LockCond>(
-        m_components.template getMutex<components::CType2EType<EMT, T>::EType>(),
-        m_components.template getMutex<components::CType2EType<EMT, Ts>::EType>()...);
+        m_components.template getMutex<CType2EType<EMT, T>::EType>(),
+        m_components.template getMutex<CType2EType<EMT, Ts>::EType>()...);
     shrLock<LockCond> lockEnt {m_entities.getMutex()};
 
     // Find the minimal component set to iterate over
-    static constexpr EMT EType {components::CType2EType<EMT, T>::EType};
+    static constexpr EMT EType {CType2EType<EMT, T>::EType};
     [[maybe_unused]] SizeEid minSize {
         m_components.template size<EType>()}; // TODO: False positive for unused warning?
     EMT minEType {EType};
     (
         [&]
         {
-            static constexpr EMT EType {components::CType2EType<EMT, Ts>::EType};
+            static constexpr EMT EType {CType2EType<EMT, Ts>::EType};
             SizeEid size {m_components.template size<EType>()};
             if (size < minSize)
             {
@@ -209,48 +208,46 @@ inline void Lookup<EMT>::modifyGroupOfComponents(
             }
         }(),
         ...);
-    const std::vector<entity::eid> *minEids {nullptr};
+    const std::vector<Entity::eid> *minEids {nullptr};
     detail::ETypeRT2CT(minEType, [&]<EMT ETypeCT>
                        { minEids = &m_components.template getEntityRefs<ETypeCT>(); });
     assert(minEids);
 
-    // Iterate over all entities having the requested components
-    for (entity::eid eid : *minEids)
+    // Iterate over all entities having the requested Components
+    for (Entity::eid eid : *minEids)
     {
-        if (not m_entities.template containsComponents<components::CType2EType<EMT, T>::EType,
-                                                       components::CType2EType<EMT, Ts>::EType...>(
-                eid))
+        if (not m_entities.template containsComponents<CType2EType<EMT, T>::EType,
+                                                       CType2EType<EMT, Ts>::EType...>(eid))
             continue;
-        auto getCompLValue = [&]<components::CType<EMT> CT>(entity::eid eid) -> CT &
+        auto getCompLValue = [&]<CType<EMT> CT>(Entity::eid eid) -> CT &
         {
-            static constexpr EMT EType {components::CType2EType<EMT, CT>::EType};
+            static constexpr EMT EType {CType2EType<EMT, CT>::EType};
             return m_components
                 .template getComponents<EType>()[m_entities.template getComponentRefs<EType>(eid)];
         };
         static_assert(std::is_same_v<decltype(getCompLValue.template operator()<T>(eid)), T &>,
                       "Wrong type");
-        std::invoke(modifyFunct, entity::Entity {.id = eid},
-                    getCompLValue.template operator()<T>(eid),
+        std::invoke(modifyFunct, Entity {.id = eid}, getCompLValue.template operator()<T>(eid),
                     getCompLValue.template operator()<Ts>(eid)...);
     }
 }
 
-template <components::EMetaType EMT>
-template <bool LockCond, components::CType<EMT> T>
+template <EMetaType EMT>
+template <bool LockCond, CType<EMT> T>
 inline void Lookup<EMT>::modifyAllComponents(std::invocable<T &> auto funct)
 {
-    static constexpr EMT EType {components::CType2EType<EMT, T>::EType};
+    static constexpr EMT EType {CType2EType<EMT, T>::EType};
     shrLock<LockCond> lockComp {m_components.template getMutex<EType>()};
 
     for (T &comp : m_components.template getComponents<EType>())
         std::invoke(funct, comp);
 }
 
-template <components::EMetaType EMT>
-template <bool LockCond, components::CType<EMT> T>
-inline bool Lookup<EMT>::modifyComponent(entity::eid eid, std::invocable<T &> auto modifyFunct)
+template <EMetaType EMT>
+template <bool LockCond, CType<EMT> T>
+inline bool Lookup<EMT>::modifyComponent(Entity::eid eid, std::invocable<T &> auto modifyFunct)
 {
-    static constexpr EMT EType {components::CType2EType<EMT, T>::EType};
+    static constexpr EMT EType {CType2EType<EMT, T>::EType};
     shrLock<LockCond> lockComp {m_components.template getMutex<EType>()};
     shrLock<LockCond> lockEnt {m_entities.getMutex()};
     SizeEid comp {m_entities.template getComponentRefs<EType>(eid)};
@@ -258,26 +255,26 @@ inline bool Lookup<EMT>::modifyComponent(entity::eid eid, std::invocable<T &> au
     return true;
 }
 
-template <components::EMetaType EMT>
-template <bool LockCond, components::CType<EMT> T, components::CType<EMT>... Ts>
+template <EMetaType EMT>
+template <bool LockCond, CType<EMT> T, CType<EMT>... Ts>
 inline void Lookup<EMT>::readGroupOfComponents(
-    std::invocable<entity::Entity, const T &, const Ts &...> auto readFunct) const
+    std::invocable<Entity, const T &, const Ts &...> auto readFunct) const
 {
-    // Lock all given components
+    // Lock all given Components
     auto lockComps = utl::makeConditScopedLock<LockCond>(
-        m_components.template getMutex<components::CType2EType<EMT, T>::EType>(),
-        m_components.template getMutex<components::CType2EType<EMT, Ts>::EType>()...);
+        m_components.template getMutex<CType2EType<EMT, T>::EType>(),
+        m_components.template getMutex<CType2EType<EMT, Ts>::EType>()...);
     shrLock<LockCond> lockEnt {m_entities.getMutex()};
 
     // Find the minimal component set to iterate over
-    static constexpr EMT EType {components::CType2EType<EMT, T>::EType};
+    static constexpr EMT EType {CType2EType<EMT, T>::EType};
     [[maybe_unused]] SizeEid minSize {
         m_components.template size<EType>()}; // TODO: False positive for unused warning?
     EMT minEType {EType};
     (
         [&]
         {
-            static constexpr EMT EType {components::CType2EType<EMT, Ts>::EType};
+            static constexpr EMT EType {CType2EType<EMT, Ts>::EType};
             SizeEid size {m_components.template size<EType>()};
             if (size < minSize)
             {
@@ -286,50 +283,48 @@ inline void Lookup<EMT>::readGroupOfComponents(
             }
         }(),
         ...);
-    const std::vector<entity::eid> *minEids {nullptr};
+    const std::vector<Entity::eid> *minEids {nullptr};
     detail::ETypeRT2CT(minEType, [&]<EMT ETypeCT>
                        { minEids = &m_components.template getEntityRefs<ETypeCT>(); });
     assert(minEids);
 
     // Iterate over all entities having the requested components
-    for (const entity::eid eid : *minEids)
+    for (const Entity::eid eid : *minEids)
     {
-        if (not m_entities.template containsComponents<components::CType2EType<EMT, T>::EType,
-                                                       components::CType2EType<EMT, Ts>::EType...>(
-                eid))
+        if (not m_entities.template containsComponents<CType2EType<EMT, T>::EType,
+                                                       CType2EType<EMT, Ts>::EType...>(eid))
             continue;
-        auto getCompLValue = [&]<components::CType<EMT> CT>(const entity::eid eid) -> const CT &
+        auto getCompLValue = [&]<CType<EMT> CT>(const Entity::eid eid) -> const CT &
         {
-            static constexpr EMT EType {components::CType2EType<EMT, CT>::EType};
+            static constexpr EMT EType {CType2EType<EMT, CT>::EType};
             return m_components
                 .template getComponents<EType>()[m_entities.template getComponentRefs<EType>(eid)];
         };
         static_assert(
             std::is_same_v<decltype(getCompLValue.template operator()<T>(eid)), const T &>,
             "Wrong type");
-        std::invoke(readFunct, entity::Entity {.id = eid},
-                    getCompLValue.template operator()<T>(eid),
+        std::invoke(readFunct, Entity {.id = eid}, getCompLValue.template operator()<T>(eid),
                     getCompLValue.template operator()<Ts>(eid)...);
     }
 }
 
-template <components::EMetaType EMT>
-template <bool LockCond, components::CType<EMT> T>
+template <EMetaType EMT>
+template <bool LockCond, CType<EMT> T>
 inline void Lookup<EMT>::readAllComponents(std::invocable<const T &> auto readFunct) const
 {
-    static constexpr EMT EType {components::CType2EType<EMT, T>::EType};
+    static constexpr EMT EType {CType2EType<EMT, T>::EType};
     shrLock<LockCond> lockComp {m_components.template getMutex<EType>()};
 
     for (const T &comp : m_components.template getComponents<EType>())
         std::invoke(readFunct, comp);
 }
 
-template <components::EMetaType EMT>
-template <bool LockCond, components::CType<EMT> T>
-inline bool Lookup<EMT>::readComponent(entity::eid eid,
+template <EMetaType EMT>
+template <bool LockCond, CType<EMT> T>
+inline bool Lookup<EMT>::readComponent(Entity::eid eid,
                                        std::invocable<const T &> auto readFunct) const
 {
-    static constexpr EMT EType {components::CType2EType<EMT, T>::EType};
+    static constexpr EMT EType {CType2EType<EMT, T>::EType};
     shrLock<LockCond> lockComp {m_components.template getMutex<EType>()};
     shrLock<LockCond> lockEnt {m_entities.getMutex()};
     SizeEid comp {m_entities.template getComponentRefs<EType>(eid)};
@@ -337,21 +332,21 @@ inline bool Lookup<EMT>::readComponent(entity::eid eid,
     return true;
 }
 
-template <components::EMetaType EMT>
-template <bool LockCond, components::CType<EMT> T>
+template <EMetaType EMT>
+template <bool LockCond, CType<EMT> T>
 inline bool Lookup<EMT>::removeComponent(SizeEid compIt)
 {
-    static constexpr EMT EType {components::CType2EType<EMT, T>::EType};
+    static constexpr EMT EType {CType2EType<EMT, T>::EType};
     unqLock<LockCond> lockComp {m_components.template getMutex<EType>()};
     shrLock<LockCond> lockEnt {m_entities.getMutex()};
     return removeComponent_eid<false, T>(m_components.template getEntityRefs<EType>(compIt));
 }
 
-template <components::EMetaType EMT>
-template <bool LockCond, components::CType<EMT> T>
-inline bool Lookup<EMT>::removeComponent_eid(entity::eid eid)
+template <EMetaType EMT>
+template <bool LockCond, CType<EMT> T>
+inline bool Lookup<EMT>::removeComponent_eid(Entity::eid eid)
 {
-    static constexpr EMT EType {components::CType2EType<EMT, T>::EType};
+    static constexpr EMT EType {CType2EType<EMT, T>::EType};
     shrLock<LockCond> lockEnt {m_entities.getMutex()};
     SizeEid oldRef {m_entities.template removeComponentRef<EType>(eid)};
     if (oldRef == detail::Entities<EMT>::NONE)
@@ -368,9 +363,9 @@ inline bool Lookup<EMT>::removeComponent_eid(entity::eid eid)
     return true;
 }
 
-template <components::EMetaType EMT>
+template <EMetaType EMT>
 template <bool LockCond>
-inline bool Lookup<EMT>::removeComponent_eid(entity::eid eid)
+inline bool Lookup<EMT>::removeComponent_eid(Entity::eid eid)
 {
     shrLock<LockCond> lockEnt {m_entities.getMutex()};
     [&]<SizeEType... IETypes>(std::integer_sequence<SizeEType, IETypes...>)
@@ -384,8 +379,7 @@ inline bool Lookup<EMT>::removeComponent_eid(entity::eid eid)
                 if (compRef == m_entities.NONE)
                     return;
                 unqLock<LockCond> lockComp {m_components.template getMutex<EType>()};
-                removeComponent_eid<false, typename components::EType2CType<EMT, EType>::CType>(
-                    eid);
+                removeComponent_eid<false, typename EType2CType<EMT, EType>::CType>(eid);
             }(),
             ...);
     }(std::make_integer_sequence<SizeEType, std::to_underlying(EMT::countEType)> {});
@@ -393,19 +387,19 @@ inline bool Lookup<EMT>::removeComponent_eid(entity::eid eid)
     return true;
 }
 
-template <components::EMetaType EMT>
-template <bool LockCond, components::CType<EMT>... Ts>
-inline void Lookup<EMT>::assignComponents(entity::eid eid, Ts &&...comps)
+template <EMetaType EMT>
+template <bool LockCond, CType<EMT>... Ts>
+inline void Lookup<EMT>::assignComponents(Entity::eid eid, Ts &&...comps)
 {
     ((assignComponents<LockCond>(eid, std::forward<Ts>(comps))), ...);
 }
 
-template <components::EMetaType EMT>
-template <bool LockCond, components::CType<EMT> T>
-inline void Lookup<EMT>::assignComponents(entity::eid eid, T &&comp)
+template <EMetaType EMT>
+template <bool LockCond, CType<EMT> T>
+inline void Lookup<EMT>::assignComponents(Entity::eid eid, T &&comp)
 {
     using ClearT = std::decay_t<T>;
-    static constexpr EMT EType {components::CType2EType<EMT, ClearT>::EType};
+    static constexpr EMT EType {CType2EType<EMT, ClearT>::EType};
 
     unqLock<LockCond> lockComp {m_components.template getMutex<EType>()};
     shrLock<LockCond> lockEnt {m_entities.getMutex()};
@@ -413,4 +407,4 @@ inline void Lookup<EMT>::assignComponents(entity::eid eid, T &&comp)
     auto compRef = m_components.template insert<EType>(eid, std::move(comp));
     m_entities.template assignComponent<EType>(eid, compRef);
 };
-} // namespace lbr::ecs::lookup
+} // namespace lbr::ecs

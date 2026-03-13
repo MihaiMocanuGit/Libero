@@ -3,7 +3,6 @@
 #include "../Components.hpp"
 #include "../Entity.hpp"
 
-#include <atomic>
 #include <boost/container/flat_map.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <shared_mutex>
@@ -11,15 +10,13 @@
 #include <utility>
 #include <vector>
 
-namespace lbr::ecs::lookup::detail
+namespace lbr::ecs::detail
 {
 
 using namespace lbr::ecs;
 
-using SizeEid = entity::eid;
-
 // TODO: move them to a TMP utility header.
-template <components::EMetaType EMT>
+template <EMetaType EMT>
 using ETypeTuple =
     decltype([]<SizeEType... IETypes>(std::integer_sequence<SizeEType, IETypes...>)               //
              {                                                                                    //
@@ -27,7 +24,7 @@ using ETypeTuple =
              }                                                                                    //
              ( std::make_integer_sequence<SizeEType, std::to_underlying(EMT::countEType)> {}));   //
 
-template <components::EMetaType EMT, template <EMT> class Wrapper>
+template <EMetaType EMT, template <EMT> class Wrapper>
 using ETypeTupleWrap =
     decltype([]<SizeEType... IETypes>(std::integer_sequence<SizeEType, IETypes...>)             //
              {                                                                                  //
@@ -50,17 +47,17 @@ void ETypeRT2CT(EMT runtime, F &&f)
     }(std::make_integer_sequence<SizeEType, N> {});
 }
 
-template <components::EMetaType EMT>
+template <EMetaType EMT>
 struct Components
 {
     template <EMT EType>
     struct TypeData
     {
-        using CompT = typename components::EType2CType<EMT, EType>::CType;
+        using CompT = typename EType2CType<EMT, EType>::CType;
         using CompVecT = std::vector<CompT>;
-        using EntRVecT = std::vector<entity::eid>;
+        using EntRVecT = std::vector<Entity::eid>;
         std::vector<CompT> components;
-        std::vector<entity::eid> entityRefs;
+        std::vector<Entity::eid> entityRefs;
     };
     using Types = ETypeTupleWrap<EMT, TypeData>;
     mutable std::array<std::shared_mutex, std::to_underlying(EMT::countEType)> mtxs;
@@ -86,7 +83,7 @@ struct Components
     Types types;
 
     template <EMT EType>
-    SizeEid insert(entity::eid eid, components::EType2CType<EMT, EType>::CType &&comp)
+    SizeEid insert(Entity::eid eid, EType2CType<EMT, EType>::CType &&comp)
     {
         SizeEid compRef {size<EType>()};
         getComponents<EType>().push_back(std::move(comp));
@@ -174,7 +171,7 @@ struct Components
     }
 };
 
-template <components::EMetaType EMT>
+template <EMetaType EMT>
 struct Entities
 {
     static constexpr auto NONE {static_cast<SizeEid>(-1)};
@@ -205,61 +202,61 @@ struct Entities
      lock
      * can be used if you know what you're doing (no resize, no back() read/modify, etc.)
      * */
-    entity::eid create(SizeEid numEntities = 1)
+    Entity::eid create(SizeEid numEntities = 1)
     {
-        auto firstEid {static_cast<entity::eid>(compRefs.size())};
+        auto firstEid {static_cast<Entity::eid>(compRefs.size())};
         static Col col;
         col.fill(NONE); // this should get optimised away.
         compRefs.insert(compRefs.end(), numEntities, col);
         return firstEid;
     };
 
-    void swap(entity::eid eid1, entity::eid eid2)
+    void swap(Entity::eid eid1, Entity::eid eid2)
     {
         std::swap(getComponentRefs(eid1), getComponentRefs(eid2));
     };
 
     // NOTE: it is assumed that eid is not in the region [endPos, end]
-    void swapEnd(entity::eid eid, SizeEid endPos = 0) { swap(eid, size() - endPos - 1); };
+    void swapEnd(Entity::eid eid, SizeEid endPos = 0) { swap(eid, size() - endPos - 1); };
 
-    entity::eid removeLast(SizeEid numEntities = 1)
+    Entity::eid removeLast(SizeEid numEntities = 1)
     {
-        auto firstEid {static_cast<entity::eid>(compRefs.size() - numEntities + 1)};
+        auto firstEid {static_cast<Entity::eid>(compRefs.size() - numEntities + 1)};
         compRefs.erase(compRefs.end() - numEntities, compRefs.end());
         return firstEid;
     };
 
     template <EMT EType>
-    SizeEid getComponentRefs(entity::eid eid) const
+    SizeEid getComponentRefs(Entity::eid eid) const
     {
         return compRefs[eid][std::to_underlying(EType)];
     }
 
     template <EMT EType>
-    SizeEid &getComponentRefs(entity::eid eid)
+    SizeEid &getComponentRefs(Entity::eid eid)
     {
         return compRefs[eid][std::to_underlying(EType)];
     }
 
-    const Col &getComponentRefs(entity::eid eid) const { return compRefs[eid]; }
+    const Col &getComponentRefs(Entity::eid eid) const { return compRefs[eid]; }
 
-    Col &getComponentRefs(entity::eid eid) { return compRefs[eid]; }
+    Col &getComponentRefs(Entity::eid eid) { return compRefs[eid]; }
 
     template <EMT EType>
-    bool containsComponents(entity::eid eid) const
+    bool containsComponents(Entity::eid eid) const
     {
         return getComponentRefs<EType>(eid) != NONE;
     };
 
     template <EMT EType1, EMT EType2, EMT... ETypes>
-    bool containsComponents(entity::eid eid) const
+    bool containsComponents(Entity::eid eid) const
     {
         return containsComponents<EType1>(eid) && containsComponents<EType2>(eid) &&
                (containsComponents<ETypes>(eid) && ...);
     };
 
     template <EMT EType>
-    SizeEid removeComponentRef(entity::eid eid)
+    SizeEid removeComponentRef(Entity::eid eid)
     {
         SizeEid oldRef {getComponentRefs<EType>(eid)};
         getComponentRefs<EType>(eid) = NONE;
@@ -273,9 +270,9 @@ struct Entities
     std::shared_mutex &getMutex() const noexcept { return mtx; }
 
     template <EMT EType>
-    void assignComponent(entity::eid eid, SizeEid compRef)
+    void assignComponent(Entity::eid eid, SizeEid compRef)
     {
         getComponentRefs<EType>(eid) = compRef;
     }
 };
-} // namespace lbr::ecs::lookup::detail
+} // namespace lbr::ecs::detail

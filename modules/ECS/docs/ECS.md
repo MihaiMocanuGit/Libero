@@ -173,7 +173,7 @@ inside a member method that accepts a functor.
 
 Take for example the following function, that needs a functor:
 ```c++
-template <bool LockCond, components::CType<EMT> T>
+template <bool LockCond, CType<EMT> T>
 void readAllComponents(std::invocable<const T &> auto funct) const;
 ```
 

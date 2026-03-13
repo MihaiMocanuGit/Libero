@@ -1,18 +1,14 @@
 #pragma once
 
-#include "Libero/Utilities/Vec.hpp"
-
 #include <concepts>
 #include <cstdint>
 #include <type_traits>
 #include <utility>
 
-namespace lbr::ecs{
-using SizeEType = uint8_t;
-}
-
-namespace lbr::ecs::components
+namespace lbr::ecs
 {
+using SizeEType = uint8_t;
+
 template <typename EMT>
 concept EMetaType = requires {
     requires std::is_enum_v<EMT>;
@@ -54,4 +50,4 @@ struct CType2EType
     static_assert(false, "Trying to use unspecialized template");
 };
 
-} // namespace lbr::ecs::components
+} // namespace lbr::ecs

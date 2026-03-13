@@ -7,14 +7,12 @@
 #include <numeric>
 
 using namespace lbr;
-using namespace lbr::ecs::entity;
-using namespace lbr::ecs::components;
-using namespace lbr::ecs::lookup;
+using namespace lbr::ecs;
 
 // Only EType2CType and CType2EType have to be in the lbr::ecs::components namespace. The components
 // themselves and the EMetaType can be defined outside, but it makes more sense if all of them are
 // grouped under the same namespace
-namespace lbr::ecs::components
+namespace comps
 {
 enum class EnumTypes : SizeEType // It is important to have SizeEType as its underlying type.
 {
@@ -27,28 +25,17 @@ enum class EnumTypes : SizeEType // It is important to have SizeEType as its und
                 // them.
 
 };
-static_assert(EMetaType<EnumTypes>, "EnumTypes is not an EMetaType");
+static_assert(lbr::ecs::EMetaType<EnumTypes>, "EnumTypes is not an EMetaType");
 
 struct Transform
 {
-    utl::Vec3f pos;
+    lbr::utl::Vec3f pos;
     // uint8_t padding1;
-    utl::Vec3f rot;
+    lbr::utl::Vec3f rot;
     // uint8_t padding2;
-    utl::Vec3f size;
+    lbr::utl::Vec3f size;
     // uint8_t padding2;
 };
-template <>
-struct EType2CType<EnumTypes, EnumTypes::Transform>
-{
-    using CType = Transform;
-};
-template <>
-struct CType2EType<EnumTypes, Transform>
-{
-    static constexpr EnumTypes EType = EnumTypes::Transform;
-};
-static_assert(CType<Transform, EnumTypes>, "Transform is not a CType");
 
 struct Boundary
 {
@@ -58,40 +45,59 @@ struct Boundary
         CYLINDRICAL,      // r=max(x1,x2), h=x3
         ELIPTIC_CYLINDER, // a=x1, b=x2, h=x3
     } type;
-    utl::Vec3f size;
+    lbr::utl::Vec3f size;
 };
-template <>
-struct EType2CType<EnumTypes, EnumTypes::Boundary>
-{
-    using CType = Boundary;
-};
-template <>
-struct CType2EType<EnumTypes, Boundary>
-{
-    static constexpr EnumTypes EType = EnumTypes::Boundary;
-};
-static_assert(CType<Boundary, EnumTypes>, "Boundary is not a CType");
 
 struct Controllable
 {
     bool userControlled;
-    utl::Vec3f stepSize;
+    lbr::utl::Vec3f stepSize;
+};
+} // namespace comps
+
+namespace lbr::ecs
+{
+template <>
+struct EType2CType<comps::EnumTypes, comps::EnumTypes::Transform>
+{
+    using CType = comps::Transform;
 };
 template <>
-struct EType2CType<EnumTypes, EnumTypes::Controllable>
+struct CType2EType<comps::EnumTypes, comps::Transform>
 {
-    using CType = Controllable;
+    static constexpr comps::EnumTypes EType = comps::EnumTypes::Transform;
+};
+static_assert(CType<comps::Transform, comps::EnumTypes>, "Transform is not a CType");
+
+template <>
+struct EType2CType<comps::EnumTypes, comps::EnumTypes::Boundary>
+{
+    using CType = comps::Boundary;
 };
 template <>
-struct CType2EType<EnumTypes, Controllable>
+struct CType2EType<comps::EnumTypes, comps::Boundary>
 {
-    static constexpr EnumTypes EType = EnumTypes::Controllable;
+    static constexpr comps::EnumTypes EType = comps::EnumTypes::Boundary;
 };
-static_assert(CType<Controllable, EnumTypes>, "Boundary is not a CType");
-} // namespace lbr::ecs::components
+static_assert(CType<comps::Boundary, comps::EnumTypes>, "Boundary is not a CType");
+
+template <>
+struct EType2CType<comps::EnumTypes, comps::EnumTypes::Controllable>
+{
+    using CType = comps::Controllable;
+};
+template <>
+struct CType2EType<comps::EnumTypes, comps::Controllable>
+{
+    static constexpr comps::EnumTypes EType = comps::EnumTypes::Controllable;
+};
+static_assert(CType<comps::Controllable, comps::EnumTypes>, "Boundary is not a CType");
+
+} // namespace lbr::ecs
 
 TEST_CASE("Entity Creation", "[ECS][Lookup]")
 {
+    using namespace comps;
     Lookup<EnumTypes> lk;
     Entity ent0 = lk.createEntity<true>();
     REQUIRE(ent0.id == 0);
@@ -101,6 +107,7 @@ TEST_CASE("Entity Creation", "[ECS][Lookup]")
 
 TEST_CASE("Component Creation", "[ECS][Lookup]")
 {
+    using namespace comps;
     Lookup<EnumTypes> lk;
     Entity ent {lk.createEntity<true>()};
 
@@ -140,6 +147,7 @@ TEST_CASE("Component Creation", "[ECS][Lookup]")
 
 TEST_CASE("Multiple entities", "[ECS][Lookup]")
 {
+    using namespace comps;
     constexpr unsigned NO_ENT {1'000};
     Lookup<EnumTypes> lk;
     for (unsigned i {0}; i < NO_ENT; ++i)
@@ -177,6 +185,7 @@ TEST_CASE("Multiple entities", "[ECS][Lookup]")
 
 TEST_CASE("Read Component Group", "[ECS][Lookup]")
 {
+    using namespace comps;
     constexpr unsigned NO_ENT {1'000};
     Lookup<EnumTypes> lk;
     for (unsigned i {0}; i < NO_ENT; ++i)
@@ -273,6 +282,7 @@ TEST_CASE("Read Component Group", "[ECS][Lookup]")
 
 TEST_CASE("Remove entities", "[ECS][Lookup]")
 {
+    using namespace comps;
     constexpr unsigned NO_ENT {1'000};
     Lookup<EnumTypes> lk;
     for (unsigned i {0}; i < NO_ENT; ++i)
@@ -358,7 +368,7 @@ TEST_CASE("Remove entities", "[ECS][Lookup]")
 
     SECTION("Remove all")
     {
-        std::vector<eid> eids(NO_ENT, 0);
+        std::vector<Entity::eid> eids(NO_ENT, 0);
         std::iota(eids.begin(), eids.end(), 0);
         lk.removeEntities<true>(eids);
         REQUIRE(lk.numberOfEntities<true>() == 0);
@@ -371,7 +381,7 @@ TEST_CASE("Remove entities", "[ECS][Lookup]")
 
     SECTION("Remove first half")
     {
-        std::vector<eid> eids(NO_ENT / 2, 0);
+        std::vector<Entity::eid> eids(NO_ENT / 2, 0);
         std::iota(eids.begin(), eids.end(), 0);
         lk.removeEntities<true>(eids);
         REQUIRE(lk.numberOfEntities<true>() == NO_ENT - eids.size());
@@ -385,7 +395,7 @@ TEST_CASE("Remove entities", "[ECS][Lookup]")
 
     SECTION("Remove second half")
     {
-        std::vector<eid> eids(NO_ENT / 2, 0);
+        std::vector<Entity::eid> eids(NO_ENT / 2, 0);
         std::iota(eids.begin(), eids.end(), NO_ENT / 2);
         lk.removeEntities<true>(eids);
         REQUIRE(lk.numberOfEntities<true>() == NO_ENT - eids.size());
@@ -400,10 +410,11 @@ TEST_CASE("Remove entities", "[ECS][Lookup]")
 
     SECTION("Remove alternating")
     {
-        std::vector<eid> eids(NO_ENT, 0);
+        std::vector<Entity::eid> eids(NO_ENT, 0);
         std::iota(eids.begin(), eids.end(), 0);
-        eids.erase(std::remove_if(eids.begin(), eids.end(), [](eid x) { return x % 2 == 1; }),
-                   eids.end());
+        eids.erase(
+            std::remove_if(eids.begin(), eids.end(), [](Entity::eid x) { return x % 2 == 1; }),
+            eids.end());
         lk.removeEntities<true>(eids);
         REQUIRE(lk.numberOfEntities<true>() == NO_ENT / 2 + NO_ENT % 2);
         REQUIRE(lk.numberOfComponents<true, Transform>() == NO_ENT / 2 + NO_ENT % 2);
@@ -416,7 +427,7 @@ TEST_CASE("Remove entities", "[ECS][Lookup]")
     }
     SECTION("Remove single, but repeated eid")
     {
-        std::vector<eid> eids(NO_ENT, 0);
+        std::vector<Entity::eid> eids(NO_ENT, 0);
         lk.removeEntities<true>(eids);
         REQUIRE(lk.numberOfEntities<true>() == NO_ENT - 1);
         REQUIRE(lk.numberOfComponents<true, Transform>() == lk.numberOfEntities<true>());

@@ -2,18 +2,17 @@
 
 #include <cstdint>
 
-namespace lbr::ecs::entity
+namespace lbr::ecs
 {
-using eid = uint32_t;
-constexpr eid neid {static_cast<eid>(-1)};
 
 struct Entity
 {
+    using eid = uint32_t;
+    static constexpr eid neid {static_cast<eid>(-1)};
+
     eid id;
 };
-} // namespace lbr::ecs::entity
 
-namespace lbr::ecs
-{
-using SizeEid = entity::eid;
-}
+using SizeEid = Entity::eid;
+
+} // namespace lbr::ecs
