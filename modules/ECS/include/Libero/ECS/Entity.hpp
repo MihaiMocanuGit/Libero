@@ -5,7 +5,7 @@
 namespace lbr::ecs::entity
 {
 using eid = uint32_t;
-constexpr eid nid {static_cast<eid>(-1)};
+constexpr eid neid {static_cast<eid>(-1)};
 
 struct Entity
 {
@@ -13,7 +13,7 @@ struct Entity
 };
 } // namespace lbr::ecs::entity
 
-namespace lbr::ecs {
-    using SizeEid = entity::eid;
+namespace lbr::ecs
+{
+using SizeEid = entity::eid;
 }
-
