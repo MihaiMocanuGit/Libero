@@ -1,10 +1,10 @@
 set(module_name ECS)
 
-set(public_headers "Components.hpp;Entity.hpp;Lookup.hpp")
+set(public_headers "Components.hpp;Entity.hpp;Lookup.hpp;SystemCRTP.hpp")
 set(private_headers "")
 set(detail_headers "Lookup.hxx")
 set(sources "")
-set(tests "Test_Lookup.cpp")
+set(tests "Test_Lookup.cpp;Test_SystemCRTP.cpp")
 
 set(public_deps "Utilities;HelpersSDL")
 set(private_deps "")
