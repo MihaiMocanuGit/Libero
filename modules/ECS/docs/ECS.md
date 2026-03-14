@@ -1,6 +1,7 @@
 # ECS documentation (WIP)
 
-This module is composed of three main parts: Entity, Components and the Lookup class.
+The functionality of this module is composed from three main parts: Entity, Components and the
+Lookup class. Moreover a generic interface for systems is also defined: SystemCRTP.
 
 ## Entity
 
@@ -211,6 +212,44 @@ A more in-depth documentation to the locking strategy will be created later on.
 The `eids` are not stable w.r.t the removals of some entities. That is, the removal of `N` entities
 will change the `eids` of at most `N` other entities. To be more precise, the `eids` of the last `N`
 entities will be changed to the `eids` of the removed entities. (Swap and Erase idiom)
+
+## SystemCRTP
+
+Unlike the previosly mentioned modules, this one is not mandatory for the ECS system to function.
+It's a utility class, designed to be of use in system creation, as it declares the necessary
+interface that might be needed. All one has to do to use it is to implement the usual CRTP derived
+class. 
+
+For example:
+```c++
+class Derived_intRef : public SystemCRTP<Derived_intRef>
+{
+    using Base = SystemCRTP<Derived_intRef>;
+  public:
+    int test = 0;
+    explicit Derived_intRef(uint64_t runEveryMS = 0) noexcept : Base(runEveryMS) {}
+
+  private:
+    int &run_crtp(uint64_t) { return ++test; }
+    friend Base;
+};
+```
+
+As SystemCRTP is a generic utility, a user needs to implement the `<return type> run_crtp(uint64
+deltaTime)` member function according to his/her needs. This function is internally called by
+`SystemCRTP<Derived>::run(uint64_t currentTime)` if `runEveryMS` miliseconds have elapsed since the
+last `run()` call.
+
+It's important to note that the return type of `run_crtp()` is customizable. In general, `run()`
+will have the following return type: `std::optional<decltype(run_crtp())>`. If `run()` was invoked
+before the `runEveryMS` timer has elapsed, then it will return a `std::nullopt`. Two exceptions
+exist to this rule:
+1. If `run_crtp()` is a void function, then `run()` will also be void.
+1. If 'run_crtp()' returns a lvalue reference, then `run()` will return a
+   `std::optional<std::reference_wrapper<>>` 
+
+In addition, the `SystemCRTP` class exposes the following protected variables, all of which can be
+modified if needed: `runEveryMS`, `lastRunTime`, `isFirstRun`.
 
 ## Final Notes
 
