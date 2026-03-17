@@ -3,8 +3,7 @@
 #include "../Components.hpp"
 #include "../Entity.hpp"
 
-#include <boost/container/flat_map.hpp>
-#include <boost/dynamic_bitset.hpp>
+#include <array>
 #include <shared_mutex>
 #include <tuple>
 #include <utility>

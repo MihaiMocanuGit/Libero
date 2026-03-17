@@ -5,7 +5,9 @@
 #include "Libero/Utilities/ConditLock.hpp"
 #include "detail/Lookup.hxx"
 
+#include <algorithm>
 #include <cassert>
+#include <functional>
 #include <mutex>
 #include <ranges>
 #include <shared_mutex>
