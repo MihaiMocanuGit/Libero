@@ -1,26 +1,26 @@
 ###################################################################################################
 # Boost
 ###################################################################################################
-set(Boost_version "1.88.0")
-set(Boost_components container)
-set(Boost_header_only_components)
-set(BOOST_ENABLE_CMAKE ON)
-find_package(Boost ${Boost_version} QUIET CONFIG COMPONENTS ${Boost_components} ${Boost_header_only_components})
-if(Boost_FOUND)
-    message(STATUS "Boost was found.")
-else()
-    message(STATUS "Boost was not found, fetching...")
-    include(FetchContent)
-    FetchContent_Declare(Boost
-        GIT_REPOSITORY "https://github.com/boostorg/boost.git"
-        GIT_TAG "boost-${Boost_version}"
-        GIT_SHALLOW TRUE
-        GIT_PROGRESS TRUE)
-    FetchContent_MakeAvailable(Boost)
-endif()
-set(Boost_targets ${Boost_components})
-list(TRANSFORM Boost_targets PREPEND "Boost::")
-message(STATUS "Boost_targets = ${Boost_targets}")
+# set(Boost_version "1.88.0")
+# set(Boost_components container)
+# set(Boost_header_only_components)
+# set(BOOST_ENABLE_CMAKE ON)
+# find_package(Boost ${Boost_version} QUIET CONFIG COMPONENTS ${Boost_components} ${Boost_header_only_components})
+# if(Boost_FOUND)
+#     message(STATUS "Boost was found.")
+# else()
+#     message(STATUS "Boost was not found, fetching...")
+#     include(FetchContent)
+#     FetchContent_Declare(Boost
+#         GIT_REPOSITORY "https://github.com/boostorg/boost.git"
+#         GIT_TAG "boost-${Boost_version}"
+#         GIT_SHALLOW TRUE
+#         GIT_PROGRESS TRUE)
+#     FetchContent_MakeAvailable(Boost)
+# endif()
+# set(Boost_targets ${Boost_components})
+# list(TRANSFORM Boost_targets PREPEND "Boost::")
+# message(STATUS "Boost_targets = ${Boost_targets}")
 
 ###################################################################################################
 # Catch2v3
@@ -83,5 +83,6 @@ endif()
 # Linking all into third_party
 ###################################################################################################
 add_library(third_party INTERFACE)
-target_link_libraries(third_party INTERFACE Catch2::Catch2WithMain SDL3_image::SDL3_image SDL3::SDL3 ${Boost_targets})
+target_link_libraries(third_party INTERFACE Catch2::Catch2WithMain SDL3_image::SDL3_image SDL3::SDL3)
+    #${Boost_targets})
 target_include_directories(third_party INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
