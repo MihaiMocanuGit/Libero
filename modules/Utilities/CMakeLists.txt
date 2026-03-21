@@ -1,10 +1,10 @@
 set(module_name Utilities)
 
-set(public_headers "Vec.hpp;ConditLock.hpp;SmartResource.hpp")
+set(public_headers "Vec.hpp;ConditLock.hpp;SmartResource.hpp;SpaceMapping.hpp")
 set(private_headers "")
-set(detail_headers "Vec.hxx;SmartResource.hxx")
+set(detail_headers "Vec.hxx;SmartResource.hxx;SpaceMapping.hxx")
 set(sources "")
-set(tests "TestVec.cpp")
+set(tests "TestVec.cpp;TestSpaceMapping.cpp")
 
 set(public_deps "")
 set(private_deps "")
