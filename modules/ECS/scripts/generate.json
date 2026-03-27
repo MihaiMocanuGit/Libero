@@ -1,0 +1,19 @@
+{
+  "namespace_name": "cmps",
+  "parent_header": "EcsComponents.hpp",
+  "output_path": "EcsBoilerplate.hxx",
+  "types": [
+    "Transform",
+    "Move",
+    "Health",
+    "Stamina",
+    "DamageResistance",
+    "Team",
+    "Attacks",
+    "Select",
+    "Formation",
+    "Boundary",
+    "Draw",
+    "Description"
+  ]
+}
